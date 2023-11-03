@@ -1,0 +1,21 @@
+# Date picker
+tkcalendar
+
+# Working with Excel files
+openpyxl
+
+# Data manipulation with pandas
+pandas
+
+# MongoDB
+pymongo
+
+# Python dotenv for environment variables
+python-dotenv
+
+# PyTorch and Transformers library
+torch
+transformers
+
+# PyInstaller for creating standalone executables
+pyinstaller
