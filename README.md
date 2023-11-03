@@ -1,6 +1,6 @@
 # SoftwareBERTSaludCMV
 
-**SoftwareBERTSaludCMV: Machine Learning Data Classification Tool for Healthcare**
+## SoftwareBERTSaludCMV: Machine Learning Data Classification Tool for Healthcare
 
 SoftwareBERTSaludCMV is an advanced data classification tool designed for the Municipal Corporation of Valparaíso to assist in the evaluation and analysis of healthcare-related feedback. Utilizing a sophisticated BERT (Bidirectional Encoder Representations from Transformers) model, this software adeptly categorizes large volumes of anonymous user data into a MongoDB database. The classified outcomes are marked as '0', '1', or '2', indicating 'irrelevant', 'negative', or 'positive', respectively, providing a clear and actionable insight into patient sentiments and experiences.
 
