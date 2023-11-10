@@ -14,6 +14,7 @@ from tkinter.filedialog import asksaveasfilename
 def open_data_window():
     data_window = tk.Tk()
     data_window.geometry("1000x768")
+    data_window.iconbitmap('logo.ico')
     data_window.title("Explorar datos")
 
     # Apply the Azure theme
