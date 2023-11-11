@@ -1,35 +1,37 @@
 import tkinter as tk
-import database as database
-import classifier
 from tkinter import ttk
 from tkcalendar import DateEntry 
 from datetime import datetime, timedelta
 import re
-from openpyxl.utils import get_column_letter
 import pandas as pd
 from tkinter.filedialog import asksaveasfilename
+import database as database
+import classifier
 
-
-
+# ENG: Main window for exploring data
+# ESP: Ventana principal para explorar datos
 def open_data_window():
     data_window = tk.Tk()
     data_window.geometry("1000x768")
-    data_window.iconbitmap('logo.ico')
     data_window.title("Explorar datos")
+    data_window.iconbitmap('logo.ico')
 
-    # Apply the Azure theme
+    # ENG: Apply the Azure theme with dark mode
+    # ESP: Aplicar el tema Azure con modo oscuro
     data_window.tk.call("source", "azure.tcl")
     data_window.tk.call("set_theme", "dark")
 
+    # ENG: Table and dropdown column names
+    # ESP: Nombres de columnas para la tabla y el menú desplegable
     table_columns = ('ID', 'Edad', 'Género', 'Centro de Salud', 'Frecuencia', 'Satisfacción', 'Recomendación', 'Comentario Abierto', 'Fecha', 'Etiqueta')
-
     dropdown_columns = ('Edad', 'Género', 'Centro de Salud', 'Frecuencia', 'Satisfacción', 'Recomendación', 'Comentario Abierto', 'Fecha', 'Etiqueta')
 
-
+    # ENG: Search UI elements
+    # ESP: Elementos de la interfaz de búsqueda
     search_label = ttk.Label(data_window, text="Search:")
     search_label.grid(row=0, column=0, padx=5, pady=5)
 
-    column_options = ['All'] + list(dropdown_columns)  # Use dropdown_columns for the dropdown options
+    column_options = ['All'] + list(dropdown_columns)
     selected_column = tk.StringVar()
     selected_column.set('All')
     column_selector = ttk.Combobox(data_window, textvariable=selected_column, values=column_options, width=20)
@@ -41,25 +43,29 @@ def open_data_window():
     search_button = ttk.Button(data_window, text="Search", command=lambda: search_data(search_entry.get(), selected_column.get()))
     search_button.grid(row=0, column=3, padx=5, pady=5)
 
+    # ENG: Result treeview for displaying search results
+    # ESP: Vista de árbol de resultados para mostrar resultados de búsqueda
     result_tree = ttk.Treeview(data_window, columns=table_columns, show='headings', height=15)
     result_tree.grid(row=1, column=0, columnspan=4, padx=5, pady=5, sticky='nsew')
 
-    for column in table_columns:  # Use table_columns for the table headers
+    for column in table_columns:
         result_tree.heading(column, text=column)
         result_tree.column(column, width=len(column) * 10)
 
-
+    # ENG: Detailed text area for displaying selected row details
+    # ESP: Área de texto detallada para mostrar detalles de la fila seleccionada
     detail_text = tk.Text(data_window, wrap='word', height=15)
     detail_text.grid(row=2, column=0, columnspan=4, padx=5, pady=5, sticky='nsew')
 
+    # ENG: Function to update selected column from dropdown
+    # ESP: Función para actualizar la columna seleccionada desde el menú desplegable
     def update_selected_column(event):
         selected_column.set(column_selector.get())
-        print(f"Column selected: {selected_column.get()}")  # This line is for debugging, you can remove it later
 
-    # Binding the update_selected_column function to the <<ComboboxSelected>> event
     column_selector.bind('<<ComboboxSelected>>', update_selected_column)
 
-
+    # ENG: Function to display details of the selected row in the treeview
+    # ESP: Función para mostrar detalles de la fila seleccionada en la vista de árbol
     def on_row_selected(event):
         selected_items = result_tree.selection()
         if selected_items:
@@ -71,6 +77,8 @@ def open_data_window():
 
     result_tree.bind('<<TreeviewSelect>>', on_row_selected)
 
+    # ENG: Function to preprocess and format the search query based on the selected column
+    # ESP: Función para preprocesar y formatear la consulta de búsqueda en función de la columna seleccionada
     def preprocess_query(query, column):
         column = column.lower()  # Convert the selected column to lowercase
         query = query.lower()  # Convert the query to lowercase for case-insensitive matching
@@ -216,8 +224,8 @@ def open_data_window():
         else:
             return query
 
-
-
+    # ENG: Function to perform data search and update the treeview with results
+    # ESP: Función para realizar la búsqueda de datos y actualizar la vista de árbol con los resultados
     def search_data(query, column):
         processed_query = preprocess_query(query, column)
         for row in result_tree.get_children():
@@ -240,8 +248,8 @@ def open_data_window():
                                                     result['frecuencia'], result['satisfaccion'], result['recomendacion'],
                                                     result['razon'], result['date'], target_text))
 
-
-
+    # ENG: Function to convert target number to corresponding text
+    # ESP: Función para convertir el número objetivo al texto correspondiente
     def target_number_to_text(target_number):
         target_texts = {
             0: 'Irrelevante',
@@ -251,6 +259,8 @@ def open_data_window():
         }
         return target_texts.get(target_number, 'Unknown')
     
+    # ENG: Function to save data to Excel file
+    # ESP: Función para guardar datos en un archivo Excel
     def save_to_excel():
         # Retrieve data from the table
         rows = result_tree.get_children()
@@ -271,64 +281,75 @@ def open_data_window():
 
         tk.messagebox.showinfo("Information", f"Data saved to {file_name}")
 
-    # Add a button to trigger the save_to_excel function
     save_button = ttk.Button(data_window, text="Exportar Excel", command=save_to_excel)
-    save_button.grid(row=3, column=3, padx=5, pady=5)  # Adjust the row and column as needed
-
-
+    save_button.grid(row=3, column=3, padx=5, pady=5)
 
     data_window.grid_columnconfigure(2, weight=1)
     data_window.grid_rowconfigure(2, weight=1)
-
     data_window.mainloop()
 
 
-
+# ENG: Main application window setup
+# ESP: Configuración de la ventana principal de la aplicación
 app = tk.Tk()  
 app.geometry("420x280")
 app.title("Clasificador de Datos")
 app.iconbitmap('logo.ico')
 app.minsize(420, 280)
 
-
-# Apply the Azure theme
+# ENG: Apply the Azure theme with dark mode
+# ESP: Aplicar el tema Azure con modo oscuro
 app.tk.call("source", "azure.tcl")
 app.tk.call("set_theme", "dark")
 
+# ENG: Label for total documents in the database
+# ESP: Etiqueta para el total de documentos en la base de datos
 total_docs_label = ttk.Label(app)
 total_docs_label.grid(row=0, column=0, padx=20, pady=20, sticky='w')
 
+# ENG: Label for uncategorized documents in the database
+# ESP: Etiqueta para documentos sin clasificar en la base de datos
 uncategorized_docs_label = ttk.Label(app)
 uncategorized_docs_label.grid(row=1, column=0, padx=20, pady=20, sticky='w')
 
+# ENG: Button to classify data
+# ESP: Botón para clasificar datos
 classify_button = ttk.Button(app, text="Clasificar datos", command=lambda: classify_and_update())
 classify_button.grid(row=0, column=1, padx=20, pady=20, sticky='ew')
 
+# ENG: Button to explore data
+# ESP: Botón para explorar datos
 view_data_button = ttk.Button(app, text="Explorar datos", command=open_data_window)
 view_data_button.grid(row=1, column=1, padx=20, pady=20, sticky='ew')
 
+# ENG: Button to reset targets in the database
+# ESP: Botón para restablecer objetivos en la base de datos
 reset_targets_button = ttk.Button(app, text="Restaurar etiqueta de los datos", command=lambda: reset_all_targets_to_3())
 reset_targets_button.grid(row=2, column=0, columnspan=2, padx=20, pady=20, sticky='ew')
 
+# ENG: Label for last update timestamp
+# ESP: Etiqueta para la última marca de tiempo de actualización
 last_updated_label = ttk.Label(app, anchor='center')  # Setting text alignment to center
 last_updated_label.grid(row=3, column=0, columnspan=2, padx=20, pady=20, sticky='ew')  # Making the label expand horizontally
 
-# Ensure that the columns expand as the window is resized
+# Structure
 app.grid_columnconfigure(0, weight=1)
 app.grid_columnconfigure(1, weight=1)
 
-# Adjust the row weights. Rows containing buttons will have a weight of 0.
-app.grid_rowconfigure(0, weight=0)  # Rows with buttons get a weight of 0
-app.grid_rowconfigure(1, weight=0)  # Rows with buttons get a weight of 0
-app.grid_rowconfigure(2, weight=0)  # Rows with buttons get a weight of 0
-app.grid_rowconfigure(3, weight=0)  # Adjust as per your design
-app.grid_rowconfigure(4, weight=0)  # Adjust as per your design
+app.grid_rowconfigure(0, weight=0)  
+app.grid_rowconfigure(1, weight=0) 
+app.grid_rowconfigure(2, weight=0)  
+app.grid_rowconfigure(3, weight=0)  
+app.grid_rowconfigure(4, weight=0)  
 
+# ENG: Function to reset all targets to 3 (uncategorized) in the database
+# ESP: Función para restablecer todos los objetivos a 3 (sin clasificar) en la base de datos
 def reset_all_targets_to_3():
     database.reset_all_targets_to_3()  # Update all targets to 3
     refresh_stats() 
 
-
+# ENG: Function to update the database with classified data
+# ESP: Función para actualizar la base de datos con datos clasificados
 def update_database():
     num_updated = 0  # Initialize the count of updated documents
     documents = database.get_documents()
@@ -340,16 +361,21 @@ def update_database():
 
     return num_updated  # Return the count of updated documents
 
-# Declare num_updated_label as a global variable.
+
+# ENG: Label for the number of updated documents
+# ESP: Etiqueta para el número de documentos actualizados
 num_updated_label = ttk.Label(app, anchor='center')
 num_updated_label.grid(row=4, column=0, columnspan=2, padx=20, pady=2, sticky='ew')
 
-# Define the function to update num_updated_label based on the latest data.
+# ENG: Function to update num_updated_label based on the latest data
+# ESP: Función para actualizar num_updated_label basado en los datos más recientes
 def update_num_updated_label():
     last_log = database.get_last_log()  # Get the latest log
     if last_log:
         num_updated_label.configure(text=f"Datos clasificados: {last_log['num_updated']} datos")
 
+# ENG: Function to initialize last updated label when the app is opened
+# ESP: Función para inicializar la etiqueta de última actualización cuando se abre la aplicación
 def initialize_last_updated_label():
     last_log = database.get_last_log()
     if last_log:
@@ -366,10 +392,11 @@ def initialize_last_updated_label():
 
         last_updated_label.grid(row=3, column=0, columnspan=2, padx=20, pady=2, sticky='ew')
 
-
-# Initialize the last updated label when the app is opened
+# Call to initialize the last updated label when the app starts
 initialize_last_updated_label()
 
+# ENG: Function to classify data and update the GUI accordingly
+# ESP: Función para clasificar datos y actualizar la GUI en consecuencia
 def classify_and_update():
     num_updated = update_database()
     database.log_update(num_updated)
@@ -377,18 +404,17 @@ def classify_and_update():
     last_updated_label.configure(text=f"Última ejecución: {str(last_log['date']).split('.')[0]}")
     refresh_stats()
     
-
+# ENG: Function to refresh the statistics displayed on the GUI
+# ESP: Función para refrescar las estadísticas mostradas en la GUI
 def refresh_stats():
     total_docs_label.configure(text=f"Datos totales: {database.get_total_documents()}")
     uncategorized_docs_label.configure(text=f"Datos sin clasificar: {database.get_uncategorized_documents()}")
     initialize_last_updated_label()
 
-
-
-
-# Initialize the stats on the GUI
+# ENG: Initialize the statistics on the GUI when the application starts
+# ESP: Inicializar las estadísticas en la GUI cuando la aplicación comienza
 refresh_stats()
 
-
+# ENG: Start the Tkinter main event loop
+# ESP: Iniciar el bucle principal de eventos de Tkinter
 app.mainloop()
-
