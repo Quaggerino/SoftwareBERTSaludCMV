@@ -96,7 +96,8 @@ def open_data_window():
                 'irrelevante': 0,
                 'negativo': 1,
                 'positivo': 2,
-                'sin clasificar': 3
+                'sin clasificar': 3,
+                'error al clasificar':4
             }
 
             # Check if the query matches (even partially) any of the target texts
@@ -255,7 +256,8 @@ def open_data_window():
             0: 'Irrelevante',
             1: 'Negativo',
             2: 'Positivo',
-            3: 'Sin clasificar'
+            3: 'Sin clasificar',
+            4: 'Error al clasificar'
         }
         return target_texts.get(target_number, 'Unknown')
     
@@ -269,17 +271,21 @@ def open_data_window():
             row_data = result_tree.item(row, 'values')
             data.append(row_data)
 
+        # Check if data is empty
+        if not data:
+            tk.messagebox.showerror("Error", "No hay data disponible para exportar")
+            return
+
         # Convert the data to a pandas DataFrame
         df = pd.DataFrame(data, columns=table_columns)
 
         # Prompt the user for a save location
         file_name = asksaveasfilename(title="Save as", defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
-        
+
         if file_name:
             # Save the DataFrame to Excel format
             df.to_excel(file_name, index=False, engine='openpyxl')
-
-        tk.messagebox.showinfo("Information", f"Data saved to {file_name}")
+            tk.messagebox.showinfo("Information", f"Data saved to {file_name}")
 
     save_button = ttk.Button(data_window, text="Exportar Excel", command=save_to_excel)
     save_button.grid(row=3, column=3, padx=5, pady=5)
@@ -292,7 +298,7 @@ def open_data_window():
 # ENG: Main application window setup
 # ESP: Configuración de la ventana principal de la aplicación
 app = tk.Tk()  
-app.geometry("420x280")
+app.geometry("420x300")
 app.title("Clasificador de Datos")
 app.iconbitmap('logo.ico')
 app.minsize(420, 280)
@@ -352,14 +358,25 @@ def reset_all_targets_to_3():
 # ESP: Función para actualizar la base de datos con datos clasificados
 def update_database():
     num_updated = 0  # Initialize the count of updated documents
+    total_confidence = 0  # Sum of all confidences
+
     documents = database.get_documents()
     for doc in documents:
         razon_text = doc['razon']
-        predicted_target = classifier.classify_text(razon_text)
+        predicted_target, confidence = classifier.classify_text(razon_text)
+        if confidence < 0.70: # 70%
+            predicted_target = 4  # Set target to 4 if confidence is low
+
         database.update_target(doc['_id'], predicted_target)
+        total_confidence += confidence
         num_updated += 1  # Increment the count for each updated document
 
-    return num_updated  # Return the count of updated documents
+    average_confidence = (total_confidence / num_updated) if num_updated else 0
+    database.log_update(num_updated, average_confidence)  # Modify this method to store average confidence
+    return num_updated, average_confidence  # Return the count of updated documents and average confidence
+
+
+
 
 
 # ENG: Label for the number of updated documents
@@ -372,7 +389,9 @@ num_updated_label.grid(row=4, column=0, columnspan=2, padx=20, pady=2, sticky='e
 def update_num_updated_label():
     last_log = database.get_last_log()  # Get the latest log
     if last_log:
-        num_updated_label.configure(text=f"Datos clasificados: {last_log['num_updated']} datos")
+        num_updated = last_log['num_updated']
+        average_confidence = last_log.get('average_confidence', 0) * 100  # Convert to percentage
+        num_updated_label.configure(text=f"Datos clasificados: {num_updated} datos\nConfianza promedio: {average_confidence:.2f}%")
 
 # ENG: Function to initialize last updated label when the app is opened
 # ESP: Función para inicializar la etiqueta de última actualización cuando se abre la aplicación
@@ -398,8 +417,8 @@ initialize_last_updated_label()
 # ENG: Function to classify data and update the GUI accordingly
 # ESP: Función para clasificar datos y actualizar la GUI en consecuencia
 def classify_and_update():
-    num_updated = update_database()
-    database.log_update(num_updated)
+    num_updated, average_confidence = update_database()
+    database.log_update(num_updated, average_confidence)
     last_log = database.get_last_log()
     last_updated_label.configure(text=f"Última ejecución: {str(last_log['date']).split('.')[0]}")
     refresh_stats()

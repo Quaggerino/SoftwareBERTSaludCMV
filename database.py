@@ -162,10 +162,14 @@ def get_all_documents():
     """ Recuperar todos los documentos de la colección. """
     return list(collection.find({}))
 
-def log_update(num_updated):
-    """ Log an update action with the number of updated documents. """
-    """ Registrar una acción de actualización con el número de documentos actualizados. """
-    entry = {'date': datetime.now(), 'num_updated': num_updated}
+def log_update(num_updated, average_confidence):
+    """ Log an update action with the number of updated documents and their average confidence. """
+    """ Registrar una acción de actualización con el número de documentos actualizados y su confianza promedio. """
+    entry = {
+        'date': datetime.now(), 
+        'num_updated': num_updated,
+        'average_confidence': average_confidence  # Include the average confidence in the log
+    }
     log_collection.insert_one(entry)
 
 def get_last_log():
