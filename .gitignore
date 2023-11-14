@@ -1,12 +1,19 @@
 # .gitignore
 
+build/
+dist/
+main.spec
+
 # Byte-compiled
 
 __pycache__/
 
 # Environments
 .env*
+.venv*
 
 # Trained Model
 
 model/
+
+
