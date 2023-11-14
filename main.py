@@ -6,6 +6,16 @@ import pandas as pd
 from tkinter.filedialog import asksaveasfilename
 import database as database
 import classifier
+import os
+import sys
+
+# Set the icon path based on whether the app is running as a PyInstaller bundle or not
+if getattr(sys, 'frozen', False):
+    # If the application is running as a PyInstaller bundle
+    base_path = sys._MEIPASS
+else:
+    # If the application is running in a development environment
+    base_path = os.path.abspath(".")
 
 # ENG: Main window for exploring data
 # ESP: Ventana principal para explorar datos
@@ -13,11 +23,10 @@ def open_data_window():
     data_window = tk.Tk()
     data_window.geometry("1000x768")
     data_window.title("Explorar datos")
-    data_window.iconbitmap('logo.ico')
-
+    data_window.iconbitmap(os.path.join(base_path, 'logo.ico'))
     # ENG: Apply the Azure theme with dark mode
     # ESP: Aplicar el tema Azure con modo oscuro
-    data_window.tk.call("source", "azure.tcl")
+    data_window.tk.call("source", os.path.join(base_path, "azure.tcl"))
     data_window.tk.call("set_theme", "dark")
 
     # ENG: Table and dropdown column names
@@ -278,8 +287,19 @@ def open_data_window():
         # Convert the data to a pandas DataFrame
         df = pd.DataFrame(data, columns=table_columns)
 
-        # Prompt the user for a save location
-        file_name = asksaveasfilename(title="Save as", defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
+        # Get the current date and format it as a string, e.g., '2023-04-07'
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        
+        # Suggest a default filename including the current date
+        suggested_filename = f"Tabla de Usuarios {current_date}.xlsx"
+
+        # Prompt the user for a save location, pre-filling the suggested filename
+        file_name = asksaveasfilename(
+            title="Save as",
+            initialfile=suggested_filename,
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")]
+        )
 
         if file_name:
             # Save the DataFrame to Excel format
@@ -299,12 +319,11 @@ def open_data_window():
 app = tk.Tk()  
 app.geometry("420x300")
 app.title("Clasificador de Datos")
-app.iconbitmap('logo.ico')
-app.minsize(420, 280)
-
+app.minsize(420, 300)
 # ENG: Apply the Azure theme with dark mode
 # ESP: Aplicar el tema Azure con modo oscuro
-app.tk.call("source", "azure.tcl")
+app.iconbitmap(os.path.join(base_path, 'logo.ico'))
+app.tk.call("source", os.path.join(base_path, "azure.tcl"))
 app.tk.call("set_theme", "dark")
 
 # ENG: Label for total documents in the database

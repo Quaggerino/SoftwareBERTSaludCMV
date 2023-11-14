@@ -1,9 +1,21 @@
 import torch
 from transformers import BertTokenizer, BertForSequenceClassification
 from torch.nn.functional import softmax
+import os
+import sys
 
-# Load the model and tokenizer
-model_directory = './model'
+# Determine if we're running in a bundle
+if getattr(sys, 'frozen', False):
+    # If the 'frozen' attribute is True, we are running in a bundle (created by PyInstaller)
+    bundle_dir = sys._MEIPASS
+else:
+    # Else, we are running in a normal Python environment
+    bundle_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+# Set the model directory path
+model_directory = os.path.join(bundle_dir, 'model')
+
 tokenizer = BertTokenizer.from_pretrained(model_directory)
 model = BertForSequenceClassification.from_pretrained(model_directory)
 

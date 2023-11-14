@@ -16,3 +16,15 @@ transformers
 
 # PyInstaller for creating standalone executables
 pyinstaller
+
+tqdm
+
+regex
+
+requests
+
+numpy
+
+
+
+

@@ -2,10 +2,20 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
+import sys
 
 # Load environment variables
 # Cargar variables de entorno
-load_dotenv('.env.development')
+# Load environment variables
+if getattr(sys, 'frozen', False):
+    # If the application is running as a PyInstaller bundle
+    app_dir = sys._MEIPASS
+else:
+    # If the application is running in a development environment
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+
+dotenv_path = os.path.join(app_dir, '.env.development')
+load_dotenv(dotenv_path)
 
 # Establish MongoDB connection
 # Establecer conexión MongoDB
