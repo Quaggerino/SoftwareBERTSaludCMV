@@ -232,7 +232,7 @@ def open_data_window():
         for row in result_tree.get_children():
             result_tree.delete(row)
         
-        print(f"Searching for query: '{query}' in column: '{column}' (Processed: '{processed_query}')")  # Debug print
+        #print(f"Searching for query: '{query}' in column: '{column}' (Processed: '{processed_query}')")  # Debug print
         
         # Check if the search box is empty
         if not query.strip():
@@ -240,7 +240,7 @@ def open_data_window():
         else:
             results = database.search_documents(processed_query, column)  # Passing processed_query here
         
-        print(f"Results: {results}")  # Debug print
+        #print(f"Results: {results}")  # Debug print
         
         if results:  # Check if results are not None or empty
             for result in results:
