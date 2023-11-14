@@ -1,6 +1,3 @@
-# Date picker
-tkcalendar
-
 # Working with Excel files
 openpyxl
 
