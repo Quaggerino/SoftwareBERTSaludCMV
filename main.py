@@ -36,19 +36,19 @@ def open_data_window():
 
     # ENG: Search UI elements
     # ESP: Elementos de la interfaz de búsqueda
-    search_label = ttk.Label(data_window, text="Search:")
+    search_label = ttk.Label(data_window, text="Buscar:")
     search_label.grid(row=0, column=0, padx=5, pady=5)
 
-    column_options = ['All'] + list(dropdown_columns)
+    column_options = ['Todo'] + list(dropdown_columns)
     selected_column = tk.StringVar()
-    selected_column.set('All')
+    selected_column.set('Todo')
     column_selector = ttk.Combobox(data_window, textvariable=selected_column, values=column_options, width=20)
     column_selector.grid(row=0, column=1, padx=5, pady=5)
 
     search_entry = ttk.Entry(data_window, width=60)
     search_entry.grid(row=0, column=2, padx=5, pady=5, sticky='ew')
 
-    search_button = ttk.Button(data_window, text="Search", command=lambda: search_data(search_entry.get(), selected_column.get()))
+    search_button = ttk.Button(data_window, text="Buscar", command=lambda: search_data())
     search_button.grid(row=0, column=3, padx=5, pady=5)
 
     # ENG: Result treeview for displaying search results
@@ -60,6 +60,16 @@ def open_data_window():
         result_tree.heading(column, text=column)
         result_tree.column(column, width=len(column) * 10)
 
+    # ENG: Scrollbar for the treeview
+    # ESP: Barra de desplazamiento para la vista de árbol
+    tree_scrollbar = ttk.Scrollbar(data_window, orient="vertical", command=result_tree.yview)
+    tree_scrollbar.grid(row=1, column=5, sticky='ns')
+
+    # Configure the treeview to use the scrollbar
+    result_tree.configure(yscrollcommand=tree_scrollbar.set)
+
+    result_tree.grid(row=1, column=0, columnspan=4, padx=5, pady=5, sticky='nsew')
+    
     # ENG: Detailed text area for displaying selected row details
     # ESP: Área de texto detallada para mostrar detalles de la fila seleccionada
     detail_text = tk.Text(data_window, wrap='word', height=15)
@@ -235,7 +245,9 @@ def open_data_window():
 
     # ENG: Function to perform data search and update the treeview with results
     # ESP: Función para realizar la búsqueda de datos y actualizar la vista de árbol con los resultados
-    def search_data(query, column):
+    def search_data(event=None):
+        query = search_entry.get()
+        column = selected_column.get()
         processed_query = preprocess_query(query, column)
         for row in result_tree.get_children():
             result_tree.delete(row)
@@ -256,6 +268,7 @@ def open_data_window():
                 result_tree.insert('', tk.END, values=(result['_id'], result['edad'], result['genero'], result['cesfam'],
                                                     result['frecuencia'], result['satisfaccion'], result['recomendacion'],
                                                     result['razon'], result['date'], target_text))
+    search_entry.bind('<Return>', search_data)
 
     # ENG: Function to convert target number to corresponding text
     # ESP: Función para convertir el número objetivo al texto correspondiente
@@ -267,7 +280,7 @@ def open_data_window():
             3: 'Sin clasificar',
             4: 'Error al clasificar'
         }
-        return target_texts.get(target_number, 'Unknown')
+        return target_texts.get(target_number, 'Desconocido')
     
     # ENG: Function to save data to Excel file
     # ESP: Función para guardar datos en un archivo Excel
@@ -281,7 +294,7 @@ def open_data_window():
 
         # Check if data is empty
         if not data:
-            tk.messagebox.showerror("Error", "No hay data disponible para exportar")
+            tk.messagebox.showerror("Error", "No hay datos disponibles para exportar")
             return
 
         # Convert the data to a pandas DataFrame
@@ -295,16 +308,16 @@ def open_data_window():
 
         # Prompt the user for a save location, pre-filling the suggested filename
         file_name = asksaveasfilename(
-            title="Save as",
+            title="Guardar como",
             initialfile=suggested_filename,
             defaultextension=".xlsx",
-            filetypes=[("Excel files", "*.xlsx")]
+            filetypes=[("Formato Excel", "*.xlsx")]
         )
 
         if file_name:
             # Save the DataFrame to Excel format
             df.to_excel(file_name, index=False, engine='openpyxl')
-            tk.messagebox.showinfo("Information", f"Data saved to {file_name}")
+            tk.messagebox.showinfo("Información", f"Datos almacenados en {file_name}")
 
     save_button = ttk.Button(data_window, text="Exportar Excel", command=save_to_excel)
     save_button.grid(row=3, column=3, padx=5, pady=5)
@@ -382,7 +395,7 @@ def update_database():
     for doc in documents:
         razon_text = doc['razon']
         predicted_target, confidence = classifier.classify_text(razon_text)
-        if confidence < 0.70: # 70%
+        if confidence < 0.60: # 60%
             predicted_target = 4  # Set target to 4 if confidence is low
 
         database.update_target(doc['_id'], predicted_target)

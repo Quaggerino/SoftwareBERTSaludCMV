@@ -50,7 +50,7 @@ def get_uncategorized_documents():
     """ Obtener el conteo de documentos sin categorizar en la colección. """
     return collection.count_documents({'target': 3})
 
-def search_documents(query, column='All'):
+def search_documents(query, column='Todo'):
     """
     Search for documents in the collection based on a query and a specific column.
     Busca documentos en la colección basándose en una consulta y una columna específica.
@@ -79,7 +79,7 @@ def search_documents(query, column='All'):
 
     # If searching across all columns
     # Si se busca en todas las columnas
-    if column == 'All':
+    if column == 'Todo':
         regex_query = {"$regex": f"{query}", "$options": 'i'}
         int_query = try_int(query)
 
